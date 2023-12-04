@@ -1,0 +1,24 @@
+.bot {
+  background-color: rgb(226, 224, 224);
+  border-radius: 20px;
+  padding: 20px;
+  /* margin: 20px 0; */
+}
+.user {
+  /* background-color: rgb(247, 247, 248); */
+  background-color: rgb(247, 241, 241);
+  border-radius: 20px;
+  padding: 20px;
+}
+.input {
+  width: 65%;
+  position: fixed;
+  bottom: 20px;
+  margin: auto;
+  left: 0;
+  right: 0;
+}
+.input .ant-input-number {
+  display: block;
+  margin: 0 auto;
+}
