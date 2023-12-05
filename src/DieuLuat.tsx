@@ -1,9 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import "./App.css";
 import { Col, Form, Input, Row } from "antd";
-import { useGetSuyDien, useGetThacMac } from "./app.loader";
+import { useGetDieuLuat } from "./app.loader";
 interface Chat {
-  // id: number;
   role: string;
   option: string;
   content: any;
@@ -13,58 +12,89 @@ interface Suggest {
   value: string;
   label: string;
 }
-function App() {
+export const DieuLuat = () => {
   const [form] = Form.useForm();
-  const [thacMac, setThacMac] = useState("");
   const [cauHoi, setCauHoi] = useState<Suggest>();
-  const [listTraLoi, setListTraLoi] = useState<any>([]);
   const [suggest, setSuggest] = useState<Suggest[]>([
     {
-      value: "Q01",
-      label: "Thắc mắc về sân đấu, phụ kiện và trang thiết bị trên sân",
+      value: "1",
+      label: "SÂN VÀ CÁC THIẾT BỊ TRÊN SÂN THI ĐẤU",
     },
-    { value: "Q07", label: "Thắc mắc về qui định với quả cầu" },
-    { value: "Q11", label: "Thắc mắc về quy định với vợt" },
-    { value: "Q12", label: "Thắc mắc về hệ thống thi đấu" },
-    { value: "Q34", label: "Thắc mắc về lỗi trong thi đấu" },
-    { value: "Q38", label: "Như thế nào là cầu ngoài cuộc" },
     {
-      value: "Q39",
-      label: "Thắc mắc về những vi phạm vận động viên phải tránh và xử phạt",
+      value: "2",
+      label: "CẦU",
     },
-    { value: "Q40", label: "Thắc mắc về các nhân viên" },
+    {
+      value: "3",
+      label: "THỬ CẦU",
+    },
+    {
+      value: "4",
+      label: "VỢT",
+    },
+    {
+      value: "5",
+      label: "TRANG THIẾT BỊ HỢP LỆ",
+    },
+    {
+      value: "6",
+      label: "TUNG ĐỒNG XU BẮT THĂM",
+    },
+    {
+      value: "7",
+      label: "HỆ THỐNG TÍNH ĐIỂM",
+    },
+    {
+      value: "8",
+      label: "ĐỔI SÂN",
+    },
+    {
+      value: "9",
+      label: "GIAO CẦU",
+    },
+    {
+      value: "10",
+      label: "THI ĐẤU ĐƠN",
+    },
+    {
+      value: "11",
+      label: "THI ĐẤU ĐÔI",
+    },
+    {
+      value: "12",
+      label: "LỖI Ô GIAO CẦU",
+    },
+    {
+      value: "13",
+      label: "LỖI",
+    },
+    {
+      value: "14",
+      label: "GIAO CẦU LẠI",
+    },
+    {
+      value: "15",
+      label: "CẦU NGOÀI CUỘC",
+    },
+    {
+      value: "16",
+      label: "THI ĐẤU LIÊN TỤC, LỖI TÁC PHONG ĐẠO ĐỨC VÀ CÁC HÌNH PHẠT",
+    },
+    {
+      value: "17",
+      label: "CÁC NHÂN VIÊN VÀ NHỮNG KHIẾU NẠI",
+    },
   ]);
   const [chats, setChats] = useState<Chat[]>([
     {
       role: "bot",
       content: suggest,
       option: "suggest",
-      title: "Bạn đang thắc mắc về điều gì ?",
+      title: "Bạn muốn tra cứu về điều gì ?",
     },
   ]);
-  const { data: dataThacMac } = useGetThacMac({
-    thacMac: thacMac,
-  });
-  const { data: dataTraLoi } = useGetSuyDien({
-    suydien: cauHoi?.value,
-  });
-  useEffect(() => {
-    if (dataThacMac && dataThacMac.length > 0) {
-      const convertData = dataThacMac?.map((item: any) => {
-        return { value: item?.id, label: item?.moTa };
-      });
-      setSuggest(convertData);
-      setChats([
-        ...chats,
-        {
-          role: "bot",
-          content: convertData,
-          option: "suggest",
-          title: `Có vẻ bạn đang "${cauHoi?.label}", xin hãy cho tôi biết chi tiết hơn:`,
-        },
-      ]);
-    }
-  }, [dataThacMac]);
+  const { data: dataTraLoi } = useGetDieuLuat({ dieuluat: cauHoi?.value });
+
   useEffect(() => {
     if (dataTraLoi && dataTraLoi.length > 0) {
       const contentElements = dataTraLoi?.map((item: any, index: any) => {
@@ -90,20 +120,15 @@ function App() {
           </Col>
         );
       });
-      if (dataThacMac?.length > 0) {
-        setListTraLoi([...listTraLoi, ...contentElements]);
-      } else {
-        console.log([...listTraLoi, ...contentElements]);
-        setChats([
-          ...chats,
-          {
-            role: "bot",
-            content: [{ id: "", label: [...listTraLoi, ...contentElements] }],
-            option: "traLoi",
-            title: "Đây là các điều luật liên quan đến câu hỏi của bạn:",
-          },
-        ]);
-      }
+      setChats([
+        ...chats,
+        {
+          role: "bot",
+          content: [{ id: "", label: contentElements }],
+          option: "traLoi",
+          title: `Đây là các điều luật liên quan đến ${cauHoi?.label}:`,
+        },
+      ]);
     }
   }, [dataTraLoi]);
 
@@ -116,7 +141,6 @@ function App() {
     };
     setChats([...chats, newChat]);
     form.resetFields();
-    setThacMac(suggest[values?.question - 1]?.value);
     setCauHoi(suggest[values?.question - 1]);
   };
   const messagesRef = useRef<HTMLDivElement>(null);
@@ -175,29 +199,27 @@ function App() {
                     </Col>
                   </Row>
                 )}
-                {chat?.role === "bot" &&
-                  chat?.option === "traLoi" &&
-                  dataThacMac?.length === 0 && (
-                    <>
-                      <Row>
-                        <Col className="bot" span={18}>
-                          <div style={{ fontSize: 20 }}>{chat?.title}</div>
-                          {chat?.content?.map((item: any) => {
-                            return <Row>{item?.label}</Row>;
-                          })}
-                        </Col>
-                      </Row>
-                      <Row style={{ marginTop: 30 }}>
-                        <Col className="bot" span={18}>
-                          <div style={{ fontSize: 20 }}>
-                            Tiếp theo bạn muốn tôi giúp gì ?
-                          </div>
-                          <Row>1. Tiếp tục thắc mắc</Row>
-                          <Row>2. Tra cứu điều luật</Row>
-                        </Col>
-                      </Row>
-                    </>
-                  )}
+                {chat?.role === "bot" && chat?.option === "traLoi" && (
+                  <>
+                    <Row>
+                      <Col className="bot" span={18}>
+                        <div style={{ fontSize: 20 }}>{chat?.title}</div>
+                        {chat?.content?.map((item: any) => {
+                          return <Row>{item?.label}</Row>;
+                        })}
+                      </Col>
+                    </Row>
+                    <Row style={{ marginTop: 30 }}>
+                      <Col className="bot" span={18}>
+                        <div style={{ fontSize: 20 }}>
+                          Tiếp theo bạn muốn tôi giúp gì ?
+                        </div>
+                        <Row>1. Tiếp tục tra cứu</Row>
+                        <Row>2. Giải đáp thắc mắc</Row>
+                      </Col>
+                    </Row>
+                  </>
+                )}
               </>
             );
           })}
@@ -217,9 +239,9 @@ function App() {
               <Row>
                 <Input
                   autoFocus
-                  className="input"
                   size="large"
                   placeholder="Vui lòng nhập số"
+                  className="input"
                 />
               </Row>
             </Form.Item>
@@ -228,6 +250,4 @@ function App() {
       </Row>
     </div>
   );
-}
-
-export default App;
+};
