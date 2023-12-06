@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import "./App.css";
 import { Col, Form, Input, Row } from "antd";
 import { useGetSuyDien, useGetThacMac } from "./app.loader";
+import { useNavigate } from "react-router-dom";
 interface Chat {
   // id: number;
   role: string;
@@ -13,27 +14,29 @@ interface Suggest {
   value: string;
   label: string;
 }
+const dieuLuat = [
+  {
+    value: "Q01",
+    label: "Thắc mắc về sân đấu, phụ kiện và trang thiết bị trên sân",
+  },
+  { value: "Q07", label: "Thắc mắc về qui định với quả cầu" },
+  { value: "Q11", label: "Thắc mắc về quy định với vợt" },
+  { value: "Q12", label: "Thắc mắc về hệ thống thi đấu" },
+  { value: "Q34", label: "Thắc mắc về lỗi trong thi đấu" },
+  { value: "Q38", label: "Như thế nào là cầu ngoài cuộc" },
+  {
+    value: "Q39",
+    label: "Thắc mắc về những vi phạm vận động viên phải tránh và xử phạt",
+  },
+  { value: "Q40", label: "Thắc mắc về các nhân viên" },
+];
 function App() {
+  const navigate = useNavigate();
   const [form] = Form.useForm();
   const [thacMac, setThacMac] = useState("");
   const [cauHoi, setCauHoi] = useState<Suggest>();
   const [listTraLoi, setListTraLoi] = useState<any>([]);
-  const [suggest, setSuggest] = useState<Suggest[]>([
-    {
-      value: "Q01",
-      label: "Thắc mắc về sân đấu, phụ kiện và trang thiết bị trên sân",
-    },
-    { value: "Q07", label: "Thắc mắc về qui định với quả cầu" },
-    { value: "Q11", label: "Thắc mắc về quy định với vợt" },
-    { value: "Q12", label: "Thắc mắc về hệ thống thi đấu" },
-    { value: "Q34", label: "Thắc mắc về lỗi trong thi đấu" },
-    { value: "Q38", label: "Như thế nào là cầu ngoài cuộc" },
-    {
-      value: "Q39",
-      label: "Thắc mắc về những vi phạm vận động viên phải tránh và xử phạt",
-    },
-    { value: "Q40", label: "Thắc mắc về các nhân viên" },
-  ]);
+  const [suggest, setSuggest] = useState<Suggest[]>(dieuLuat);
   const [chats, setChats] = useState<Chat[]>([
     {
       role: "bot",
@@ -93,7 +96,6 @@ function App() {
       if (dataThacMac?.length > 0) {
         setListTraLoi([...listTraLoi, ...contentElements]);
       } else {
-        console.log([...listTraLoi, ...contentElements]);
         setChats([
           ...chats,
           {
@@ -102,6 +104,10 @@ function App() {
             option: "traLoi",
             title: "Đây là các điều luật liên quan đến câu hỏi của bạn:",
           },
+        ]);
+        setSuggest([
+          { value: "sg1", label: "Tiếp tục tra cứu" },
+          { value: "sg2", label: "Giải đáp thắc mắc" },
         ]);
       }
     }
@@ -116,8 +122,25 @@ function App() {
     };
     setChats([...chats, newChat]);
     form.resetFields();
-    setThacMac(suggest[values?.question - 1]?.value);
-    setCauHoi(suggest[values?.question - 1]);
+    if (suggest[values?.question - 1]?.value === "sg1") {
+      setSuggest(dieuLuat);
+      setChats([
+        ...chats,
+        newChat,
+        {
+          role: "bot",
+          content: dieuLuat,
+          option: "suggest",
+          title: "Bạn đang thắc mắc về điều gì ?",
+        },
+      ]);
+    } else if (suggest[values?.question - 1]?.value === "sg2") {
+      navigate("/tra-cuu-dieu-luat");
+      window.location.reload();
+    } else {
+      setThacMac(suggest[values?.question - 1]?.value);
+      setCauHoi(suggest[values?.question - 1]);
+    }
   };
   const messagesRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -132,7 +155,7 @@ function App() {
       messagesRef.current.scrollTop = scrollValue;
     }
   };
-  const validateNumber = (rule: any, value: any, callback: any) => {
+  const validateNumber = (_: any, value: any, callback: any) => {
     const numberValue = Number(value);
 
     if (isNaN(numberValue)) {

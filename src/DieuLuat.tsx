@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import "./App.css";
 import { Col, Form, Input, Row } from "antd";
 import { useGetDieuLuat } from "./app.loader";
+import { useNavigate } from "react-router-dom";
 interface Chat {
   role: string;
   option: string;
@@ -12,79 +13,81 @@ interface Suggest {
   value: string;
   label: string;
 }
+const dieuLuat = [
+  {
+    value: "1",
+    label: "SÂN VÀ CÁC THIẾT BỊ TRÊN SÂN THI ĐẤU",
+  },
+  {
+    value: "2",
+    label: "CẦU",
+  },
+  {
+    value: "3",
+    label: "THỬ CẦU",
+  },
+  {
+    value: "4",
+    label: "VỢT",
+  },
+  {
+    value: "5",
+    label: "TRANG THIẾT BỊ HỢP LỆ",
+  },
+  {
+    value: "6",
+    label: "TUNG ĐỒNG XU BẮT THĂM",
+  },
+  {
+    value: "7",
+    label: "HỆ THỐNG TÍNH ĐIỂM",
+  },
+  {
+    value: "8",
+    label: "ĐỔI SÂN",
+  },
+  {
+    value: "9",
+    label: "GIAO CẦU",
+  },
+  {
+    value: "10",
+    label: "THI ĐẤU ĐƠN",
+  },
+  {
+    value: "11",
+    label: "THI ĐẤU ĐÔI",
+  },
+  {
+    value: "12",
+    label: "LỖI Ô GIAO CẦU",
+  },
+  {
+    value: "13",
+    label: "LỖI",
+  },
+  {
+    value: "14",
+    label: "GIAO CẦU LẠI",
+  },
+  {
+    value: "15",
+    label: "CẦU NGOÀI CUỘC",
+  },
+  {
+    value: "16",
+    label: "THI ĐẤU LIÊN TỤC, LỖI TÁC PHONG ĐẠO ĐỨC VÀ CÁC HÌNH PHẠT",
+  },
+  {
+    value: "17",
+    label: "CÁC NHÂN VIÊN VÀ NHỮNG KHIẾU NẠI",
+  },
+];
 export const DieuLuat = () => {
   const [form] = Form.useForm();
+  const navigate = useNavigate();
   const [cauHoi, setCauHoi] = useState<Suggest>();
-  const [suggest, setSuggest] = useState<Suggest[]>([
-    {
-      value: "1",
-      label: "SÂN VÀ CÁC THIẾT BỊ TRÊN SÂN THI ĐẤU",
-    },
-    {
-      value: "2",
-      label: "CẦU",
-    },
-    {
-      value: "3",
-      label: "THỬ CẦU",
-    },
-    {
-      value: "4",
-      label: "VỢT",
-    },
-    {
-      value: "5",
-      label: "TRANG THIẾT BỊ HỢP LỆ",
-    },
-    {
-      value: "6",
-      label: "TUNG ĐỒNG XU BẮT THĂM",
-    },
-    {
-      value: "7",
-      label: "HỆ THỐNG TÍNH ĐIỂM",
-    },
-    {
-      value: "8",
-      label: "ĐỔI SÂN",
-    },
-    {
-      value: "9",
-      label: "GIAO CẦU",
-    },
-    {
-      value: "10",
-      label: "THI ĐẤU ĐƠN",
-    },
-    {
-      value: "11",
-      label: "THI ĐẤU ĐÔI",
-    },
-    {
-      value: "12",
-      label: "LỖI Ô GIAO CẦU",
-    },
-    {
-      value: "13",
-      label: "LỖI",
-    },
-    {
-      value: "14",
-      label: "GIAO CẦU LẠI",
-    },
-    {
-      value: "15",
-      label: "CẦU NGOÀI CUỘC",
-    },
-    {
-      value: "16",
-      label: "THI ĐẤU LIÊN TỤC, LỖI TÁC PHONG ĐẠO ĐỨC VÀ CÁC HÌNH PHẠT",
-    },
-    {
-      value: "17",
-      label: "CÁC NHÂN VIÊN VÀ NHỮNG KHIẾU NẠI",
-    },
-  ]);
+  const [suggest, setSuggest] = useState<Suggest[]>(dieuLuat);
   const [chats, setChats] = useState<Chat[]>([
     {
       role: "bot",
@@ -129,6 +132,10 @@ export const DieuLuat = () => {
           title: `Đây là các điều luật liên quan đến ${cauHoi?.label}:`,
         },
       ]);
+      setSuggest([
+        { value: "sg1", label: "Tiếp tục tra cứu" },
+        { value: "sg2", label: "Giải đáp thắc mắc" },
+      ]);
     }
   }, [dataTraLoi]);
 
@@ -141,7 +148,22 @@ export const DieuLuat = () => {
     };
     setChats([...chats, newChat]);
     form.resetFields();
-    setCauHoi(suggest[values?.question - 1]);
+    if (suggest[values?.question - 1]?.value === "sg1") {
+      setSuggest(dieuLuat);
+      setChats([
+        ...chats,
+        newChat,
+        {
+          role: "bot",
+          content: dieuLuat,
+          option: "suggest",
+          title: "Bạn muốn tra cứu về điều gì ?",
+        },
+      ]);
+    } else if (suggest[values?.question - 1]?.value === "sg2") {
+      navigate("/");
+      window.location.reload();
+    } else setCauHoi(suggest[values?.question - 1]);
   };
   const messagesRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
