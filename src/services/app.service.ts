@@ -12,3 +12,7 @@ export const getDieuLuat= async (data:any) => {
     const result = await apiClient.get(`http://127.0.0.1:8000/dieuluat/${data.dieuluat}`);
     return result.data;
 }
+export const getListDieuLuat= async () => {
+    const result = await apiClient.get(`http://127.0.0.1:8000/list-dieu-luat`);
+    return result.data;
+}

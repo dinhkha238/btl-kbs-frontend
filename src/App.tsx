@@ -33,9 +33,8 @@ const dieuLuat = [
 function App() {
   const navigate = useNavigate();
   const [form] = Form.useForm();
-  const [thacMac, setThacMac] = useState("");
-  const [cauHoi, setCauHoi] = useState<Suggest>();
   const [listTraLoi, setListTraLoi] = useState<any>([]);
+  const [cauHoi, setCauHoi] = useState<Suggest>();
   const [suggest, setSuggest] = useState<Suggest[]>(dieuLuat);
   const [chats, setChats] = useState<Chat[]>([
     {
@@ -46,7 +45,7 @@ function App() {
     },
   ]);
   const { data: dataThacMac } = useGetThacMac({
-    thacMac: thacMac,
+    thacMac: cauHoi?.value,
   });
   const { data: dataTraLoi } = useGetSuyDien({
     suydien: cauHoi?.value,
@@ -138,7 +137,6 @@ function App() {
       navigate("/tra-cuu-dieu-luat");
       window.location.reload();
     } else {
-      setThacMac(suggest[values?.question - 1]?.value);
       setCauHoi(suggest[values?.question - 1]);
     }
   };
